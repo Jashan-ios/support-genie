@@ -41,7 +41,13 @@ Companies spend $100k+/year on customer support agents answering the same questi
 
 ## 📚 What I Learned Building This
 
-(Will document weekly)
+### Day 1 (May 5)
+- Production project structure with separation of concerns
+- Pydantic Settings for environment configuration
+- Why `.env` files matter for security
+- Multi-format document loading with type hints
+- Writing tests before moving to next layer
+- Conventional git commits (feat:, fix:, docs:)
 
 ## 🏃 Running Locally
 
