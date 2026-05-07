@@ -13,7 +13,7 @@ from langchain_text_splitters import (
     MarkdownHeaderTextSplitter
 )
 
-class ChukningService:
+class ChunkingService:
     """Provides multiple chunking startegies for douments."""
 
     @staticmethod
@@ -36,13 +36,15 @@ class ChukningService:
             chunk_overlap=overlap,
             separator=""
         )
+        return splitter.split_text(text)
+
 
     @staticmethod
     def recursive_chunks(
         text: str,
         chunk_size: int = 500,
         overlap: int = 50
-    )-> list[str]:
+    )-> List[str]:
         """
         Strategy 2: Recursive chunking (the smart default)
         
