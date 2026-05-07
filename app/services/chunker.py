@@ -83,4 +83,24 @@ class ChunkingService:
              headers_to_split_on=headers_to_split_on
          )
          docs = splitter.split_text(text)
-         return [doc.page_content for doc  in docs]
+
+         enriched_chunks = []
+         for doc in docs:
+             headers = []
+             if doc.metadata.get("Header 1"):
+                 headers.append(doc.metadata["Header 1"])
+             if doc.metadata.get("Header 2"):
+                 headers.append(doc.metadata["Header 2"])
+             if doc.metadata.get("Header 3"):
+                 headers.append(doc.metadata["Header 3"])
+
+             header_path = " > ".join(headers)
+
+             if header_path:
+                enriched = f"{header_path}\n\n{doc.page_content}"
+             else:
+               enriched = doc.page_content
+
+             enriched_chunks.append(enriched)  
+             
+         return enriched_chunks
