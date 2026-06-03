@@ -13,6 +13,7 @@ This is the main interface used by API endpoints.
 from typing import Dict, List
 from app.services.hybrid_search import HybridSearchService
 from app.services.llm import LLMService
+from app.services.reranker import ReRankerService
 
 
 class RAGService:
@@ -50,16 +51,22 @@ Rules:
 
         # Step 1-2: Hybrid search (handles embedding internally)
         print("[1/3] Running hybrid search...")
-        search_results = HybridSearchService.search(
+        candidates = HybridSearchService.search(
             collection_name=collection_name,
             query=question,
-            n_results=n_results,
+            n_results=10,
             semantic_weight=0.5
         )
+        ranked = ReRankerService.rerank(
+            query=question,
+            candidates=candidates,
+            top_n=n_results
+        )
 
-        retrieved_chunks = search_results["documents"]
-        sources = search_results["metadatas"]
-        scores = search_results["scores"]
+
+        retrieved_chunks = ranked["documents"]
+        sources = ranked["metadatas"]
+        scores = ranked["scores"]
 
         # Step 3: Build prompt with context
         print("[2/3] Building prompt...")
