@@ -14,6 +14,7 @@ from typing import Dict, List
 from app.services.hybrid_search import HybridSearchService
 from app.services.llm import LLMService
 from app.services.reranker import ReRankerService
+from app.services.question_logger import QuestionLogger
 
 
 class RAGService:
@@ -84,7 +85,7 @@ Question: {question}"""
         # Step 4: Generate answer with LLM
         print("[3/3] Generating answer...")
         answer = LLMService.generate(messages)
-
+        QuestionLogger.log(question=question, answer=answer)
         return {
             "question": question,
             "answer": answer,
