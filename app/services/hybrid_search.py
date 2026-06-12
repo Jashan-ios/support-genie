@@ -15,7 +15,7 @@ Algorithm: Reciprocal Rank Fusion (RRF)
 - Higher final rank = better match
 """
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from rank_bm25 import BM25Okapi
 from app.services.embedder import EmbeddingService
 from app.services.vector_store import VectorStoreService
@@ -30,7 +30,8 @@ class HybridSearchService:
         collection_name: str,
         query: str,
         n_results: int = 5,
-        semantic_weight: float = 0.5
+        semantic_weight: float = 0.5,
+        filter_by_section: Optional[str] = None
     ) -> Dict:
         """
         Perform hybrid search combining semantic + keyword.
@@ -50,7 +51,7 @@ class HybridSearchService:
 
         # Step 1: Semantic search
         semantic_results = cls._semantic_search(
-            collection_name, query, candidates_count
+            collection_name, query, candidates_count, filter_by_section
         )
 
         # Step 2: Keyword search (BM25) on the same candidates
@@ -72,14 +73,20 @@ class HybridSearchService:
     def _semantic_search(
         collection_name: str,
         query: str,
-        n_results: int
+        n_results: int,
+        filter_by_section: Optional[str]
+        
     ) -> Dict:
         """Run vector similarity search."""
         query_embedding = EmbeddingService.embed_text(query)
+        where = None
+        if filter_by_section:
+            where = {"section": filter_by_section}
         return VectorStoreService.search(
             collection_name=collection_name,
             query_embedding=query_embedding,
-            n_results=n_results
+            n_results=n_results,
+            where=where
         )
 
     @staticmethod

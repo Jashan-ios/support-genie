@@ -16,7 +16,8 @@ def ask_question(request: AskRequest) -> AskResponse:
         results = RAGService.ask(
             question=request.question,
             collection_name=request.collection_name,
-            n_results=request.n_results
+            n_results=request.n_results,
+            filter_by_section=request.filter_by_section
         )
         return AskResponse(**results)
     except Exception as e:

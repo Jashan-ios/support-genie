@@ -15,7 +15,7 @@ from app.services.hybrid_search import HybridSearchService
 from app.services.llm import LLMService
 from app.services.reranker import ReRankerService
 from app.services.question_logger import QuestionLogger
-
+from typing import List, Optional
 
 class RAGService:
     """Main RAG orchestrator."""
@@ -35,7 +35,8 @@ Rules:
         cls,
         question: str,
         collection_name: str,
-        n_results: int = 3
+        n_results: int = 3,
+        filter_by_section: Optional[str] = None
     ) -> Dict:
         """
         Answer a question using RAG.
@@ -56,7 +57,8 @@ Rules:
             collection_name=collection_name,
             query=question,
             n_results=10,
-            semantic_weight=0.5
+            semantic_weight=0.5,
+            filter_by_section=filter_by_section
         )
         ranked = ReRankerService.rerank(
             query=question,

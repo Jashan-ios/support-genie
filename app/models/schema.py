@@ -18,6 +18,7 @@ class AskRequest(BaseModel):
     question: str = Field(..., min_length=1, description="The user's question")
     collection_name: str = Field(..., description="which Knowledge base to query")
     n_results: int = Field(default=3, ge=1, le=10, description="How many chunks to retrieve")
+    filter_by_section: Optional[str] = Field(default=None, description="Optional: filter chunks by section")
 
 
 #-- RESPONSE SCHEMAS-------
