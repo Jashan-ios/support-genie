@@ -10,12 +10,11 @@ Orchestrates the full retrieval-augmented generation flow:
 This is the main interface used by API endpoints.
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional, Generator
 from app.services.hybrid_search import HybridSearchService
 from app.services.llm import LLMService
 from app.services.reranker import ReRankerService
 from app.services.question_logger import QuestionLogger
-from typing import List, Optional
 
 class RAGService:
     """Main RAG orchestrator."""
@@ -94,6 +93,70 @@ Question: {question}"""
             "sources": cls._format_sources(sources, scores),
             "chunks_used": len(retrieved_chunks)
         }
+    
+    @classmethod
+    def ask_stream(
+        cls,
+        question: str,
+        collection_name: str,
+        n_results: int = 3,
+        filter_by_section: Optional[str] = None
+    ) -> Generator[str, None, None]:
+        """
+        Answer a question using RAG.
+
+        Args:
+            question: The user's question
+            collection_name: Which business's collection to search
+            n_results: How many chunks to retrieve
+
+        Returns:
+            Dict with answer, sources, and metadata
+        """
+        print(f"\n❓ Question: {question}")
+
+        # Step 1-2: Hybrid search (handles embedding internally)
+        print("[1/3] Running hybrid search...")
+        candidates = HybridSearchService.search(
+            collection_name=collection_name,
+            query=question,
+            n_results=10,
+            semantic_weight=0.5,
+            filter_by_section=filter_by_section
+        )
+        ranked = ReRankerService.rerank(
+            query=question,
+            candidates=candidates,
+            top_n=n_results
+        )
+
+
+        retrieved_chunks = ranked["documents"]
+        sources = ranked["metadatas"]
+        scores = ranked["scores"]
+
+        # Step 3: Build prompt with context
+        print("[2/3] Building prompt...")
+        context = cls._format_context(retrieved_chunks)
+        user_message = f"""Context:
+{context}
+
+Question: {question}"""
+
+        messages = [
+            {"role": "system", "content": cls.SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
+
+        # Step 4: Generate answer with LLM
+        print("[3/3] Generating answer...")
+        full_answer = ""
+        for chunk in LLMService.generate_stream(messages):
+            full_answer  += chunk
+            yield chunk
+        QuestionLogger.log(question=question, answer=full_answer)
+
+         
 
     @staticmethod
     def _format_context(chunks: List[str]) -> str:

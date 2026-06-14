@@ -63,6 +63,29 @@ class LLMService:
         except Exception as e:
             print(f"❌ LLM API error: {e}")
             raise
+    
+    @classmethod
+    def generate_stream(cls, messages, model=DEFAULT_MODEL, temperature=0.3, max_tokens=1024):
+        client = cls.get_client()
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=True
+        )
+        try:
+            for chunk in response:
+                content = chunk.choices[0].delta.content
+                if content:
+                    yield content
+        except Exception as e:
+            print(f"❌ LLM API error: {e}")
+            raise
+
+                
+   
+            
 
             
                
