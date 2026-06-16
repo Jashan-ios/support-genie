@@ -38,7 +38,7 @@ class AskResponse(BaseModel):
 class IngestResponse(BaseModel):
     """Response body for the /ingest endpoint."""
     file: str
-    chunk_added: int
+    chunks_added: int
     collection: str
     total_chunks_in_collection: int
     strategy: str

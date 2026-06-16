@@ -25,7 +25,7 @@ class IngestionPipeline:
     def ingest_document(
         file_path: Path,
         collection_name: str, 
-        chunking_strategy: str  =   "recursive",
+        chunking_strategy: str  =   "auto",
         extra_metadata: Optional[Dict] = None
     ) -> Dict:
         """
@@ -50,11 +50,14 @@ class IngestionPipeline:
         text = DocumentLoader.load(file_path)
         print(f"      Loaded {len(text)} characters")
 
-        #step2: Chunk it using chosen strategy
+        if chunking_strategy == "auto":
+          chunking_strategy = ChunkingService.ch(file_path.name, text)
+        print(f"   Auto-selected chunking: {chunking_strategy}")
+
+        #step2: Chunk it using x strategy
         print("\n[2/4] Chunking text...")
         chunks = IngestionPipeline._chunk_text(text, chunking_strategy)
         print(f"      Created {len(chunks)} chunks")
-
         #step3: Generate embeddings 
         print("\n[3/4] Generating embeddings...")
         embeddings = EmbeddingService.embed_batch(chunks)

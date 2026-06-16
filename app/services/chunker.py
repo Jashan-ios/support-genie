@@ -104,3 +104,18 @@ class ChunkingService:
              enriched_chunks.append(enriched)  
              
          return enriched_chunks
+     
+    @staticmethod
+    def choose_chunking_strategy(filename: str, text: str) -> str: 
+        ext = filename.lower().rsplit(".", 1)[-1] if "." in filename else ""
+
+        if ext == "md":
+           return "markdown"
+
+        header_lines = sum(1 for line in text.splitlines() if line.lstrip().startswith("#"))
+        if header_lines >= 3:
+            return "markdown"
+
+        return "recursive"
+    
+  
